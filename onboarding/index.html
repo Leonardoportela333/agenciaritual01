@@ -569,7 +569,7 @@ async function save(filename,data){
 /* =========================================================
    Estado
    ========================================================= */
-let DB=null,USER=null,CAN=false,CONFIG={whatsapp:'',email:''};
+let DB=null,USER=null,CAN=false,CONFIG={whatsapp:'(11) 95075-6233',email:'comercial@somosritual.com.br'};
 const st={a:{},step:0,visited:0,meta:{id:uid()},sent:false};
 const draft=LS.get('ritual-onb-draft');if(draft&&draft.a){Object.assign(st,draft);}
 let saveT;function persist(){const el=$('#saveind');if(el){el.classList.add('busy');el.textContent='Salvando…'}clearTimeout(saveT);saveT=setTimeout(()=>{LS.set('ritual-onb-draft',{a:st.a,step:st.step,visited:st.visited,meta:st.meta,sent:st.sent});const e=$('#saveind');if(e){e.classList.remove('busy');e.textContent='Rascunho salvo neste navegador'}},400)}
