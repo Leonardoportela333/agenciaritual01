@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Onboarding de Tráfego · Ritual</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=swap">
+<style>
+/* VOICE: proprietary, confident, calm — a Ritual instrument, not a survey.
+   IDEA: the ritual of a kickoff — each step is a marked passage, a red tick over a grey rule.
+   PICTURE: the form itself; a vertical "rite" rail with step marks and a live progress line.
+   COLOUR and TYPE: #0A0A0A ground, #E3010D red accent, #FAFAFA ink, #A6A6A6 grey; Inter Tight.
+   LAYOUT: rail left / one calm column right; on phones a sticky progress bar and stacked fields. */
+:root{color-scheme:dark;--bg:#0A0A0A;--bg2:#121212;--bg3:#1A1A1A;--line:#2A2A2A;--ink:#FAFAFA;--mut:#A6A6A6;--dim:#6E6E6E;--red:#E3010D;--red2:#FF2A35;--ok:#3FBF7F;--warn:#E8A33C}
+*{box-sizing:border-box;min-width:0}
+html{scroll-padding-top:90px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Inter Tight",Inter,system-ui,sans-serif;overflow-x:clip;-webkit-font-smoothing:antialiased}
+a{color:var(--ink)}
+button,input,select,textarea{font:inherit;color:inherit}
+.mk{position:relative;padding-top:18px}
+.mk::before{content:"";position:absolute;left:0;right:0;top:0;height:1px;background:var(--line)}
+.mk::after{content:"";position:absolute;left:0;top:-1px;width:28px;height:3px;background:var(--red)}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.02em;font-size:20px}
+.logo i{width:10px;height:10px;border-radius:50%;background:var(--red);box-shadow:0 0 18px var(--red)}
+.logo small{font-weight:500;color:var(--mut);font-size:13px;letter-spacing:0}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:0 20px;border-radius:999px;border:1px solid var(--line);background:var(--bg3);cursor:pointer;font-weight:600;font-size:15px;text-decoration:none;transition:background .15s,border-color .15s}
+.btn:hover{border-color:#444}
+.btn.pri{background:var(--red);border-color:var(--red);color:#fff}
+.btn.pri:hover{background:var(--red2)}
+.btn.ghost{background:transparent}
+.btn.sm{min-height:36px;padding:0 14px;font-size:14px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+/* ---------- form shell ---------- */
+.shell{display:grid;grid-template-columns:300px minmax(0,1fr);min-height:100vh}
+.rail{position:sticky;top:0;height:100vh;overflow:auto;padding:32px 24px;border-right:1px solid var(--line);background:linear-gradient(180deg,#0E0E0E,#0A0A0A)}
+.rail .logo{margin-bottom:36px}
+.steps{list-style:none;margin:0;padding:0;position:relative}
+.steps::before{content:"";position:absolute;left:11px;top:8px;bottom:8px;width:1px;background:var(--line)}
+.steps .fill{position:absolute;left:11px;top:8px;width:1px;background:var(--red);transition:height .4s}
+.steps li{position:relative}
+.steps button{display:flex;gap:14px;align-items:center;width:100%;padding:8px 4px;border:0;background:none;text-align:left;cursor:pointer;color:var(--mut);font-size:14px;border-radius:8px}
+.steps button:disabled{cursor:default;opacity:.45}
+.steps .dot{flex:none;width:23px;height:23px;border-radius:50%;border:1px solid #3a3a3a;background:var(--bg);display:grid;place-items:center;font-size:11px;font-weight:700;position:relative;z-index:1}
+.steps .done .dot{background:var(--red);border-color:var(--red);color:#fff}
+.steps .cur button{color:var(--ink);font-weight:600}
+.steps .cur .dot{border-color:var(--red);box-shadow:0 0 0 4px rgba(227,1,13,.18)}
+.rail-foot{margin-top:28px;font-size:13px;color:var(--dim)}
+.save{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--mut)}
+.save::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--ok)}
+.save.busy::before{background:var(--warn)}
+.main{padding:48px max(5vw,20px) 120px;max-width:820px;width:100%}
+.topbar{display:none}
+.eyebrow{color:var(--mut);font-size:14px;margin:0 0 10px}
+h1{font-size:clamp(32px,4.4vw,48px);line-height:1.05;letter-spacing:-.03em;margin:0 0 14px;text-wrap:balance;font-weight:700}
+h2{font-size:24px;line-height:1.15;letter-spacing:-.02em;margin:0 0 8px;font-weight:700}
+h3{font-size:17px;margin:0 0 4px;font-weight:600}
+.lead{color:var(--mut);font-size:17px;max-width:62ch;margin:0 0 32px}
+.sec{margin:40px 0 18px}
+.sec h3{font-size:15px;color:var(--mut);font-weight:600}
+.f{margin:0 0 26px}
+.f>label,.f>.lb{display:block;font-weight:600;font-size:16px;margin-bottom:4px}
+.req{color:var(--red);margin-left:2px}
+.opt{color:var(--dim);font-weight:400;font-size:13px;margin-left:6px}
+.help{color:var(--mut);font-size:14px;margin:0 0 10px;max-width:64ch}
+.in{width:100%;min-height:48px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--bg2);font-size:16px;transition:border-color .15s}
+.in:focus{border-color:var(--red);outline:none}
+textarea.in{min-height:104px;resize:vertical;line-height:1.5}
+.in::placeholder{color:#5c5c5c}
+.err .in{border-color:var(--red)}
+.emsg{color:var(--red2);font-size:13px;margin-top:6px;display:none}
+.err .emsg{display:block}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{min-height:44px;padding:9px 16px;border-radius:999px;border:1px solid var(--line);background:var(--bg2);cursor:pointer;font-size:15px;text-align:left}
+.chip[aria-pressed=true]{background:rgba(227,1,13,.14);border-color:var(--red);color:#fff}
+.chip.ns[aria-pressed=true]{background:#222;border-color:#555}
+.row2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 18px}
+.nsbox{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:14px;color:var(--mut);cursor:pointer;width:max-content}
+.nsbox input{width:18px;height:18px;accent-color:var(--red)}
+.asset{padding:16px 0;border-top:1px solid var(--line)}
+.asset .hd{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap}
+.asset .nm{font-weight:600}
+.asset .hp{color:var(--mut);font-size:14px;max-width:46ch}
+.asset .chips .chip{min-height:38px;padding:6px 13px;font-size:14px}
+.asset .det{margin-top:10px}
+.note{border:1px solid var(--line);border-left:3px solid var(--red);background:var(--bg2);border-radius:12px;padding:14px 16px;font-size:15px;color:#d8d8d8;margin:0 0 28px}
+.note b{color:#fff}
+.nav{display:flex;justify-content:space-between;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--line)}
+.svc{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.svc button{padding:20px;border-radius:16px;border:1px solid var(--line);background:var(--bg2);text-align:left;cursor:pointer;min-height:130px}
+.svc button[aria-pressed=true]{border-color:var(--red);background:linear-gradient(160deg,rgba(227,1,13,.18),rgba(227,1,13,.03))}
+.svc b{display:block;font-size:18px;margin:10px 0 4px}
+.svc span{color:var(--mut);font-size:14px}
+.ic{width:34px;height:34px;border-radius:10px;background:#1f1f1f;display:grid;place-items:center}
+.facts{display:flex;flex-wrap:wrap;gap:10px 28px;color:var(--mut);font-size:14px;margin:0 0 30px}
+.facts b{color:var(--ink)}
+.rev{list-style:none;padding:0;margin:0 0 24px}
+.rev li{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 0;border-top:1px solid var(--line)}
+.tag{display:inline-flex;align-items:center;gap:6px;font-size:13px;padding:3px 10px;border-radius:999px;background:#1d1d1d;color:var(--mut);white-space:nowrap}
+.tag.ok{color:var(--ok);background:rgba(63,191,127,.1)}
+.tag.w{color:var(--warn);background:rgba(232,163,60,.1)}
+.tag.r{color:#ff6b72;background:rgba(227,1,13,.12)}
+.hero-done{padding:20px 0}
+.big-check{width:72px;height:72px;border-radius:50%;background:var(--red);display:grid;place-items:center;margin-bottom:24px;box-shadow:0 0 50px rgba(227,1,13,.45)}
+.card{border:1px solid var(--line);border-radius:16px;background:var(--bg2);padding:20px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:#fff;color:#000;padding:12px 18px;border-radius:999px;font-weight:600;font-size:14px;opacity:0;transition:.25s;pointer-events:none;z-index:50;max-width:90vw;text-align:center}
+.toast.on{opacity:1;transform:translateX(-50%)}
+/* ---------- panel ---------- */
+.pn{max-width:1240px;margin:0 auto;padding:28px max(4vw,16px) 100px}
+.pn-top{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:28px}
+.kpis{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:8px;margin:0 0 24px}
+.kpi{padding:14px 12px;border-radius:14px;border:1px solid var(--line);background:var(--bg2);cursor:pointer;text-align:left}
+.kpi[aria-pressed=true]{border-color:var(--red)}
+.kpi b{display:block;font-size:28px;line-height:1;margin-bottom:8px;font-weight:700}
+.kpi span{font-size:12.5px;color:var(--mut);line-height:1.25;display:block}
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.tools .in{max-width:320px;min-height:42px}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th{text-align:left;color:var(--mut);font-weight:500;font-size:13px;padding:10px 12px;border-bottom:1px solid var(--line)}
+td{padding:14px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+tbody tr{cursor:pointer}
+tbody tr:hover td{background:#101010}
+.meter{height:6px;border-radius:9px;background:#222;overflow:hidden;width:90px}
+.meter i{display:block;height:100%;background:var(--red)}
+.st{display:inline-flex;align-items:center;gap:7px;font-size:13px;white-space:nowrap}
+.st::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--c,#666)}
+.empty{padding:48px 20px;text-align:center;color:var(--mut);border:1px dashed var(--line);border-radius:16px}
+.det-hd{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;align-items:flex-start;margin-bottom:24px}
+.det-grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:24px;align-items:start}
+.tabs{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line);margin-bottom:22px}
+.tabs button{flex:none;padding:12px 14px;border:0;background:none;color:var(--mut);cursor:pointer;border-bottom:2px solid transparent;font-weight:500;min-height:44px}
+.tabs button[aria-selected=true]{color:var(--ink);border-color:var(--red)}
+.qa{padding:12px 0;border-top:1px solid #1e1e1e;display:grid;grid-template-columns:minmax(0,2fr) minmax(0,3fr);gap:16px}
+.qa .q{color:var(--mut);font-size:14px}
+.qa .a{white-space:pre-wrap;overflow-wrap:anywhere}
+.qa .a.no{color:var(--dim);font-style:italic}
+.ck{display:flex;gap:12px;align-items:flex-start;padding:11px 0;border-top:1px solid #1e1e1e;cursor:pointer}
+.ck input{width:20px;height:20px;margin-top:2px;accent-color:var(--red);flex:none}
+.ck .w{color:var(--mut);font-size:13px;display:block}
+.ck.on .t{color:var(--mut);text-decoration:line-through}
+.grp{margin-bottom:28px}
+.grp-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.side .card{margin-bottom:16px}
+.side label{font-size:13px;color:var(--mut);display:block;margin-bottom:6px}
+.prog{display:flex;justify-content:space-between;font-size:14px;margin:10px 0 6px}
+.bar{height:6px;background:#222;border-radius:9px;overflow:hidden}.bar i{display:block;height:100%;background:var(--red);transition:width .3s}
+.hist{font-size:13px;color:var(--mut);list-style:none;padding:0;margin:0}
+.hist li{padding:6px 0;border-top:1px solid #1e1e1e}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;padding:16px;z-index:40}
+.modal.on{display:flex}
+.modal .card{width:min(560px,100%);max-height:90vh;overflow:auto;background:#111}
+.pill-ok{color:var(--ok)}
+@media(max-width:1100px){.kpis{grid-template-columns:repeat(4,minmax(0,1fr))}.det-grid{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:900px){
+ .shell{display:block}
+ .rail{position:fixed;inset:0 25% 0 0;z-index:30;transform:translateX(-102%);transition:transform .25s;height:100%}
+ .rail.open{transform:none;box-shadow:20px 0 60px #000}
+ .topbar{display:flex;position:sticky;top:0;z-index:20;background:rgba(10,10,10,.92);backdrop-filter:blur(8px);padding:12px 16px;align-items:center;gap:12px;border-bottom:1px solid var(--line)}
+ .topbar .t{flex:1;font-size:14px}
+ .topbar .t b{display:block;font-size:15px}
+ .topbar .pb{position:absolute;left:0;bottom:-1px;height:2px;background:var(--red);transition:width .3s}
+ .main{padding-top:28px}
+}
+@media(max-width:600px){
+ .row2,.svc{grid-template-columns:minmax(0,1fr)}
+ .svc button{min-height:0}
+ .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .qa{grid-template-columns:minmax(0,1fr);gap:4px}
+ .nav .btn{flex:1}
+ table{font-size:14px}
+ .stack thead{display:none}.stack tr{display:grid;padding-block:10px;border-bottom:1px solid var(--line)}.stack td{display:flow-root;border:0;padding:3px 0;padding-inline-start:7.5em;text-align:start}.stack td::before{content:attr(data-l);float:inline-start;width:7em;margin-inline-start:-7.5em;color:var(--mut);font-size:13px}.stack td:empty{display:none}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="modal" id="modal" role="dialog" aria-modal="true"><div class="card" id="modalc"></div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+{
+/* =========================================================
+   Utilidades
+   ========================================================= */
+const $=s=>document.querySelector(s);
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const use=n=>(window.claude&&typeof window.claude.use==='function')?window.claude.use(n).catch(()=>null):Promise.resolve(null);
+const LS={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
+const NS='__ns';
+const fmtDate=t=>t?new Date(t).toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'}):'—';
+const fmtDT=t=>t?new Date(t).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):'—';
+const uid=()=>'RTL-'+new Date().toISOString().slice(2,10).replace(/-/g,'')+'-'+Math.random().toString(36).slice(2,6).toUpperCase();
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('on'),2600)}
+async function copy(text){try{await navigator.clipboard.writeText(text);toast('Copiado');return true}catch(e){toast('Não foi possível copiar automaticamente');return false}}
+const digits=s=>String(s||'').replace(/\D/g,'');
+function cnpjOk(v){const c=digits(v);if(c.length!==14||/^(\d)\1+$/.test(c))return false;const calc=n=>{let s=0,p=n-7;for(let i=0;i<n;i++){s+=+c[i]*p--;if(p<2)p=9}const r=s%11;return r<2?0:11-r};return calc(12)===+c[12]&&calc(13)===+c[13]}
+const emailOk=v=>/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(v||'').trim());
+const phoneOk=v=>{const d=digits(v).replace(/^55(?=\d{10,11}$)/,'');return d.length===10||d.length===11};
+function maskCnpj(v){const d=digits(v).slice(0,14);return d.replace(/^(\d{2})(\d)/,'$1.$2').replace(/^(\d{2})\.(\d{3})(\d)/,'$1.$2.$3').replace(/\.(\d{3})(\d)/,'.$1/$2').replace(/(\d{4})(\d)/,'$1-$2')}
+function maskPhone(v){let d=digits(v);if(d.length>11&&d.startsWith('55'))d=d.slice(2);d=d.slice(0,11);if(d.length<=2)return d?'('+d:'';if(d.length<=6)return`(${d.slice(0,2)}) ${d.slice(2)}`;if(d.length<=10)return`(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`;return`(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`}
+function maskMoney(v){const d=digits(v);if(!d)return'';return'R$ '+(+d).toLocaleString('pt-BR')}
+const money=v=>+digits(v)||0;
+
+/* =========================================================
+   Esquema do formulário
+   ========================================================= */
+const hasMeta=a=>a.servicos==='meta'||a.servicos==='ambos';
+const hasGoogle=a=>a.servicos==='google'||a.servicos==='ambos';
+const hasSite=a=>a.site_inst?.v==='sim'||a.landing?.v==='sim'||a.ecommerce?.v==='sim'||!!(a.site&&a.site!==NS);
+const isEcom=a=>a.ecommerce?.v==='sim'||(a.canais||[]).includes('E-commerce');
+const YN=['sim','nao','ns'];const YNL={sim:'Sim',nao:'Não',ns:'Não sei informar'};
+const AL={sim:'Já possuo',nao:'Não possuo',ns:'Não sei informar'};
+const ACL={vou:'Vou liberar',ajuda:'Preciso de ajuda',nao:'Não possuo'};
+const f=(t)=>(id,l,o={})=>({id,l,t,...o});
+const T=f('text'),TA=f('area'),E=f('email'),P=f('tel'),C=f('cnpj'),U=f('url'),R=f('radio'),M=f('multi'),Y=f('yn'),A=f('asset'),$M=f('money'),N=f('num'),AC=f('acc');
+const S=(sec,o={})=>({sec,...o});
+
+const STEPS=[
+{k:'inicio',t:'Começo',title:'Vamos ritualizar o início da sua operação',intro:'Este é o ponto de partida do trabalho da Ritual com a sua marca. Com estas respostas, nossa equipe planeja, configura e lança suas campanhas sem precisar te perguntar a mesma coisa duas vezes.',fields:[
+ R('servicos','Quais canais você contratou com a Ritual?',{req:true,svc:true,h:'Mostramos só as perguntas do que você contratou.'}),
+]},
+{k:'empresa',t:'Empresa',title:'Dados gerais da empresa',intro:'Quem é você no papel e no mundo digital.',fields:[
+ T('nome','Nome da empresa',{req:true,ph:'Como a marca é conhecida'}),
+ T('razao','Razão social',{req:true,w:1}),C('cnpj','CNPJ',{req:true,w:1,ph:'00.000.000/0000-00'}),
+ T('resp','Nome do responsável pelo projeto',{req:true,w:1}),T('cargo','Cargo do responsável',{w:1}),
+ E('email','E-mail',{req:true,w:1,ph:'nome@empresa.com.br'}),P('whats','WhatsApp',{req:true,w:1,ph:'(11) 98765-4321'}),
+ U('site','Site',{ns:false,ph:'www.suaempresa.com.br',h:'Se ainda não tiver site, deixe em branco.'}),
+ T('instagram','Instagram',{w:1,ph:'@suamarca'}),T('facebook','Facebook',{w:1,ph:'facebook.com/suamarca'}),
+ T('endereco','Endereço comercial'),
+ R('segmento','Segmento de atuação',{req:true,o:['Saúde e bem-estar','Alimentação','Moda e beleza','Educação','Serviços profissionais','Imobiliário','Varejo / e-commerce','Indústria','Tecnologia','Turismo e eventos','Outro']}),
+ R('tempo','Tempo de mercado',{o:['Menos de 1 ano','1 a 3 anos','3 a 10 anos','Mais de 10 anos']}),
+ N('unidades','Número de unidades',{w:1,h:'Lojas, clínicas, escritórios. Se for só online, deixe em branco.'}),
+ T('regioes','Regiões e cidades atendidas',{req:true,w:1,ph:'Ex.: Grande São Paulo, todo o Brasil'}),
+ TA('descricao','Descreva brevemente a empresa e o negócio',{req:true,ph:'Em poucas linhas: o que vocês fazem, para quem e como.'}),
+]},
+{k:'negocio',t:'Negócio',title:'Sobre o negócio',intro:'Antes de qualquer campanha, precisamos entender como sua empresa ganha dinheiro.',fields:[
+ TA('vende','O que sua empresa vende?',{req:true}),
+ TA('produtos','Quais são os principais produtos ou serviços?',{req:true}),
+ TA('lucrativos','Quais são os mais lucrativos?',{ns:true}),
+ TA('prioritarios','Quais são prioridade para divulgar agora?',{req:true,h:'O que você mais quer vender nos próximos meses.'}),
+ $M('ticket','Ticket médio',{w:1,ns:true,h:'Valor médio que um cliente gasta por compra.'}),
+ T('margem','Margem média de lucro',{w:1,ns:true,ph:'Ex.: 35%',h:'Ajuda a definir quanto podemos pagar por venda.'}),
+ TA('processo','Como funciona o processo comercial?',{req:true,h:'Do primeiro contato até o pagamento.'}),
+ TA('conversao','Como um interessado vira cliente?',{h:'Ex.: chama no WhatsApp, recebe orçamento, agenda visita, fecha.'}),
+ M('canais','Onde a venda acontece?',{req:true,o:['WhatsApp','Site','E-commerce','Telefone','Loja física','Outro']}),
+ T('capacidade','Qual é a capacidade atual de atendimento?',{ns:true,ph:'Ex.: 40 atendimentos por dia',h:'Assim não geramos mais contatos do que sua equipe consegue atender.'}),
+ Y('sazonal','Existe sazonalidade no negócio?'),
+ T('sazonal_d','Quais são os meses fortes e fracos?',{show:a=>a.sazonal==='sim'}),
+ TA('diferenciais','Quais são os principais diferenciais competitivos?',{req:true}),
+]},
+{k:'objetivos',t:'Objetivos',title:'Objetivos de marketing e mídia',intro:'O que precisa acontecer para este investimento valer a pena.',fields:[
+ R('objetivo','Qual é o principal objetivo com o tráfego pago?',{req:true,o:['Geração de leads','Vendas pelo site','Vendas pelo WhatsApp','Reconhecimento de marca','Visitas à loja física','Instalação de aplicativo','Outro']}),
+ TA('metas','Quais são as metas esperadas?'),
+ Y('meta_mensal','Existe meta mensal de vendas ou leads?'),
+ T('meta_mensal_d','Qual é a meta mensal?',{show:a=>a.meta_mensal==='sim',ph:'Ex.: 120 leads ou R$ 80 mil em vendas'}),
+ TA('resultado90','O que seria um resultado satisfatório nos primeiros 90 dias?',{req:true}),
+ R('ja_investe','Já investe ou investiu em tráfego pago?',{req:true,o:['Sim, atualmente','Já investi, mas parei','Nunca investi']}),
+ M('plataformas','Quais plataformas já usou?',{show:a=>a.ja_investe&&a.ja_investe!=='Nunca investi',o:['Meta (Facebook/Instagram)','Google Ads','TikTok Ads','LinkedIn Ads','Outra']}),
+ TA('resultados_ant','Como foram os resultados anteriores?',{ns:true,show:a=>a.ja_investe&&a.ja_investe!=='Nunca investi'}),
+ Y('agencia','Já trabalhou com outra agência ou gestor de tráfego?',{show:a=>a.ja_investe&&a.ja_investe!=='Nunca investi'}),
+ TA('funcionou','O que funcionou?',{show:a=>a.ja_investe&&a.ja_investe!=='Nunca investi'}),
+ TA('nao_funcionou','O que não funcionou?',{show:a=>a.ja_investe&&a.ja_investe!=='Nunca investi'}),
+]},
+{k:'publico',t:'Público',title:'Público-alvo e posicionamento',intro:'Quanto mais precisa a descrição, mais barato fica encontrar a pessoa certa.',fields:[
+ TA('cliente_ideal','Quem é o cliente ideal da empresa?',{req:true,ph:'Ex.: mulheres de 30 a 45 anos, mães, que trabalham fora e buscam praticidade.'}),
+ M('faixa','Faixa etária predominante',{o:['18–24','25–34','35–44','45–54','55–64','65+','Não sei informar']}),
+ R('genero','Gênero predominante',{o:['Mais mulheres','Mais homens','Equilibrado','Não é relevante']}),
+ T('local_publico','Onde o público está?',{ph:'Cidades, bairros, estados ou país'}),
+ R('poder','Poder aquisitivo predominante',{o:['Alto (classes A/B)','Médio (B/C)','Popular (C/D)','Variado','Não sei informar']}),
+ TA('interesses','Principais interesses e comportamentos',{ph:'Ex.: academia, viagens, gastronomia, empreendedorismo'}),
+ TA('problemas','Quais problemas o produto ou serviço resolve?',{req:true}),
+ TA('dores','Quais são as principais dores dos clientes?'),
+ TA('objecoes','Quais as principais objeções antes da compra?',{h:'O que faz a pessoa hesitar: preço, confiança, prazo, frete…'}),
+ TA('porque_nos','Por que alguém escolheria vocês em vez de um concorrente?'),
+ TA('excluir','Existe algum público que você não quer atingir?'),
+]},
+{k:'concorrentes',t:'Concorrentes',title:'Concorrentes e referências',intro:'Liste pelo menos três concorrentes diretos. Site ou Instagram já ajudam muito.',fields:[
+ T('c1','Concorrente 1',{req:true,w:1,ph:'Nome'}),T('c1l','Site ou Instagram do concorrente 1',{w:1,ph:'@perfil ou site'}),
+ T('c2','Concorrente 2',{w:1,ph:'Nome'}),T('c2l','Site ou Instagram do concorrente 2',{w:1}),
+ T('c3','Concorrente 3',{w:1,ph:'Nome'}),T('c3l','Site ou Instagram do concorrente 3',{w:1}),
+ TA('referencias','Quais empresas são referência no seu segmento?'),
+ TA('admira','Existem marcas cuja comunicação você admira?',{h:'Podem ser de qualquer segmento.'}),
+ TA('diferencia_com','O que diferencia a sua comunicação da concorrência?'),
+]},
+{k:'estrutura',t:'Estrutura digital',title:'Estrutura digital e ativos',intro:'Um mapa do que já existe. Se não souber o que é algum item, marque “Não sei informar”: nossa equipe verifica depois.',note:'<b>Não informe senhas aqui.</b> Os acessos serão liberados depois por convite oficial de cada plataforma, sem compartilhar login.',fields:[
+ S('Site e vendas online'),
+ A('site_inst','Site institucional',{h:'O site principal da empresa.',ph:'Endereço do site'}),
+ A('landing','Landing pages',{h:'Páginas específicas para uma oferta ou campanha.',ph:'Links das páginas'}),
+ A('ecommerce','E-commerce',{h:'Loja virtual com carrinho e pagamento online.',ph:'Endereço da loja'}),
+ A('dominio','Domínio próprio',{h:'O endereço “suamarca.com.br”, registrado em nome da empresa.',ph:'Onde está registrado? (Registro.br, GoDaddy…)'}),
+ A('plataforma_site','Plataforma do site definida',{h:'Ferramenta em que o site foi feito: WordPress, Shopify, Wix, Nuvemshop…',ph:'Qual plataforma?'}),
+ S('Vendas e relacionamento'),
+ A('crm','CRM',{h:'Sistema para organizar contatos e negociações (RD Station, HubSpot, Pipedrive, Kommo…).',ph:'Qual CRM?'}),
+ A('automacao','Ferramenta de automação',{h:'Envio automático de e-mails, mensagens ou fluxos.',ph:'Qual ferramenta?'}),
+ A('wpp_business','WhatsApp Business',{h:'Versão do WhatsApp para empresas (app ou API).',ph:'Número e se é app ou API'}),
+ S('Redes sociais'),
+ A('ig_pro','Instagram profissional',{h:'Conta comercial ou de criador, não pessoal.',ph:'@perfil'}),
+ A('fb_page','Página do Facebook',{h:'Página da empresa, não o perfil pessoal.',ph:'Link da página'}),
+ S('Meta (Facebook e Instagram)',{show:hasMeta}),
+ A('meta_ads_acc','Conta de anúncios da Meta',{show:hasMeta,h:'Onde os anúncios são criados e pagos.',ph:'ID da conta, se souber'}),
+ A('meta_bm','Portfólio Empresarial da Meta (antigo Business Manager)',{show:hasMeta,h:'Painel que reúne página, Instagram e contas de anúncio da empresa.',ph:'Nome ou ID do portfólio'}),
+ A('meta_pixel','Pixel da Meta',{show:hasMeta,h:'Código no site que informa à Meta quem visitou e comprou.',ph:'ID do Pixel, se souber'}),
+ A('meta_capi','API de Conversões da Meta',{show:hasMeta,h:'Envio das conversões direto do servidor, mais preciso que o Pixel sozinho.',ph:'Como foi configurada?'}),
+ S('Google'),
+ A('gads_acc','Conta Google Ads',{show:hasGoogle,h:'Onde os anúncios do Google são criados e pagos.',ph:'ID da conta (000-000-0000), se souber'}),
+ A('ga4','Google Analytics 4',{h:'Ferramenta que mede as visitas e ações no site.',ph:'ID da propriedade, se souber'}),
+ A('gtm','Google Tag Manager',{h:'Gerencia os códigos de rastreamento do site sem mexer na programação.',ph:'ID do contêiner (GTM-XXXX), se souber'}),
+ A('gsc','Google Search Console',{h:'Mostra como o site aparece nas buscas do Google.'}),
+ A('merchant','Google Merchant Center',{show:a=>hasGoogle(a)&&isEcom(a),h:'Cadastro dos produtos para anúncios de compras no Google.',ph:'ID da conta, se souber'}),
+ A('gtag','Google Tag / tags de conversão',{show:hasGoogle,h:'Códigos que avisam o Google Ads quando alguém converte.',ph:'Quais conversões já existem?'}),
+]},
+{k:'meta',t:'Meta Ads',when:hasMeta,title:'Campanhas no Facebook e Instagram',intro:'Portfólio, conta de anúncios e Pixel você já mapeou na etapa anterior. Aqui entram os detalhes das campanhas.',fields:[
+ T('ig_oficial','Perfil oficial do Instagram',{w:1,pre:'instagram',ph:'@suamarca'}),T('fb_oficial','Página oficial do Facebook',{w:1,pre:'facebook'}),
+ Y('meta_eventos','O site tem eventos de conversão configurados?',{show:hasSite,h:'Eventos são ações registradas, como “adicionou ao carrinho”, “comprou” ou “enviou formulário”.'}),
+ R('meta_destino','Para onde as campanhas devem levar as pessoas?',{req:true,o:['WhatsApp','Instagram Direct','Site','Landing page','Formulário instantâneo','Outro'],h:'Formulário instantâneo: a pessoa deixa os dados sem sair do Instagram ou Facebook.'}),
+ Y('catalogo','A empresa tem catálogo de produtos?',{h:'Lista de produtos com foto e preço, usada em anúncios de catálogo.'}),
+ Y('meta_hist','Existem campanhas anteriores que devemos analisar?'),
+ T('meta_hist_d','O que devemos olhar nelas?',{show:a=>a.meta_hist==='sim'}),
+ Y('criativos_disp','Existem criativos de anúncio prontos (vídeos e imagens)?',{h:'Fotos, vídeos e artes que já foram ou podem ser usados em anúncios.'}),
+ T('aprovador','Quem aprova os anúncios antes de irem ao ar?',{req:true,ph:'Nome e contato'}),
+]},
+{k:'google',t:'Google Ads',when:hasGoogle,title:'Campanhas no Google',intro:'Conta, Analytics e Tag Manager você já mapeou em Estrutura digital. Aqui definimos o que anunciar e para quem.',fields:[
+ E('gads_email','E-mail administrador da conta Google Ads',{ns:true,show:a=>a.gads_acc?.v!=='nao',h:'O e-mail que tem acesso de administrador hoje.'}),
+ Y('gads_hist','Já existem campanhas ativas ou antigas no Google?',{show:a=>a.gads_acc?.v!=='nao'}),
+ Y('g_conv','O site tem conversões configuradas no Google?',{show:hasSite,h:'Por exemplo: envio de formulário, clique no WhatsApp ou compra registrados no Google Ads.'}),
+ TA('g_anunciar','Quais produtos ou serviços quer anunciar no Google?',{req:true}),
+ T('g_regioes','Quais cidades ou regiões quer alcançar?',{req:true,pre:'regioes'}),
+ TA('kw_sim','Palavras-chave importantes',{h:'Termos que seu cliente digitaria no Google para te encontrar. Ex.: “dentista em Moema”.'}),
+ TA('kw_nao','Termos que não quer associar à marca',{h:'Ex.: “grátis”, “barato”, nome de concorrentes.'}),
+ M('g_prioridade','Os anúncios devem priorizar…',{req:true,o:['Ligações','WhatsApp','Formulários','Visitas ao site','Vendas online']}),
+ Y('gmn','Possui Perfil da Empresa no Google (Google Meu Negócio)?',{h:'Aquele cartão com endereço, horário e avaliações que aparece no Google Maps.'}),
+ T('gmn_d','Link do perfil',{show:a=>a.gmn==='sim'}),
+ Y('feed','Possui feed de produtos?',{show:isEcom,h:'Arquivo com todos os produtos da loja, usado pelo Merchant Center.'}),
+ T('aprovador_g','Quem aprova os anúncios antes de irem ao ar?',{req:true,show:a=>!hasMeta(a),ph:'Nome e contato'}),
+]},
+{k:'invest',t:'Investimento',title:'Investimento e orçamento',intro:'Para distribuir a verba com inteligência desde o primeiro dia.',note:'<b>O investimento em mídia é separado do valor de gestão da Ritual.</b> A verba de mídia é paga diretamente às plataformas (Meta e Google) com o cartão ou boleto da sua empresa.',fields:[
+ $M('inv_total','Investimento mensal em mídia',{req:true,h:'Soma de tudo que será pago às plataformas por mês.'}),
+ $M('inv_meta','Quanto para Meta Ads?',{w:1,ns:true,show:a=>a.servicos==='ambos'}),
+ $M('inv_google','Quanto para Google Ads?',{w:1,ns:true,show:a=>a.servicos==='ambos'}),
+ R('inv_flex','Há flexibilidade para aumentar conforme os resultados?',{o:['Sim','Talvez','Não','Não sei informar']}),
+ Y('inv_limite','Existe limite diário de investimento?'),
+ $M('inv_limite_v','Qual o limite diário?',{show:a=>a.inv_limite==='sim'}),
+ R('inv_aprovado','O orçamento já está aprovado?',{req:true,o:['Sim','Em aprovação','Não']}),
+ TA('inv_restr','Alguma restrição financeira ou comercial que devemos considerar?',{h:'Ex.: forma de pagamento, limite do cartão, produto que não pode receber verba.'}),
+]},
+{k:'criativos',t:'Criativos',title:'Criativos e produção de conteúdo',intro:'O que já existe e quem produz o que vem pela frente.',fields:[
+ Y('id_visual','A empresa tem identidade visual definida?',{h:'Logo, cores e fontes da marca.'}),
+ Y('manual','Possui manual de marca?'),
+ Y('fotos','Possui fotos profissionais dos produtos ou serviços?'),
+ Y('videos','Possui vídeos institucionais?'),
+ Y('depoimentos','Possui depoimentos de clientes?'),
+ Y('mat_ant','Possui materiais de campanhas anteriores?'),
+ Y('equipe_mkt','Existe equipe interna de marketing ou produção?'),
+ R('resp_prod','Quem ficará responsável pela produção dos materiais?',{req:true,o:['Ritual','Equipe interna','Outra agência ou freelancer','Ainda não definido']}),
+ R('autonomia','A Ritual terá autonomia para sugerir novos conceitos criativos?',{o:['Sim, total','Sim, com aprovação prévia','Prefiro seguir o que já existe']}),
+ TA('restr_com','Existem restrições de linguagem, imagem ou comunicação?',{h:'Ex.: regras do conselho profissional, palavras proibidas, uso de rostos.'}),
+ U('link1','Link da pasta de materiais',{h:'Google Drive, Dropbox, WeTransfer ou similar. Deixe o link com acesso para “qualquer pessoa com o link”.',ph:'https://drive.google.com/…'}),
+ U('link2','Outro link (opcional)',{w:1,ph:'https://'}),U('link3','Outro link (opcional)',{w:1,ph:'https://'}),
+]},
+{k:'comercial',t:'Atendimento',title:'Processo comercial e atendimento',intro:'O anúncio gera o contato; o atendimento gera a venda. Precisamos ver as duas pontas.',fields:[
+ T('recebe_leads','Quem recebe os contatos (leads)?',{req:true,w:1,ph:'Nome ou setor'}),N('atendentes','Quantas pessoas atendem?',{w:1}),
+ R('canal_atend','Canal principal de atendimento',{req:true,o:['WhatsApp','Telefone','E-mail','Instagram Direct','Presencial','Outro']}),
+ T('horario','Horário de funcionamento',{ph:'Ex.: seg. a sex., 8h às 18h; sáb., 9h às 13h'}),
+ R('tempo_resp','Tempo médio de resposta a um novo contato',{o:['Até 5 minutos','Até 30 minutos','Até 2 horas','No mesmo dia','Mais de um dia','Não sei informar']}),
+ Y('proc_estrut','Existe um processo comercial estruturado?',{h:'Roteiro de atendimento, etapas definidas, metas da equipe.'}),
+ Y('followup','Existe acompanhamento dos contatos que não fecham?',{h:'Ex.: retomar contato depois de alguns dias.'}),
+ T('taxa_conv','Taxa média de conversão',{ns:true,ph:'Ex.: 1 venda a cada 10 contatos',h:'De cada 10 contatos, quantos viram clientes?'}),
+ TA('prob_vendas','Existe algum problema atual no processo de vendas?'),
+ TA('acomp','Como vocês acompanham os resultados comerciais?',{h:'Planilha, CRM, relatório do vendedor, não acompanham…'}),
+]},
+{k:'acessos',t:'Acessos',title:'Acessos e próximos passos',intro:'Para começar, a equipe da Ritual precisa de acesso às contas abaixo. Os acessos são liberados por convite oficial de cada plataforma: você nunca precisa compartilhar senha. Marque como pretende fazer em cada uma; enviaremos o passo a passo.',fields:[
+ S('Meta Ads',{show:hasMeta}),
+ AC('ac_bm','Portfólio Empresarial',{show:hasMeta,h:'Adicionar a Ritual como parceira em Configurações do portfólio → Parceiros.'}),
+ AC('ac_metaads','Conta de anúncios',{show:hasMeta,h:'Compartilhada com a Ritual via Portfólio Empresarial.'}),
+ AC('ac_fb','Página do Facebook',{show:hasMeta}),
+ AC('ac_ig','Instagram',{show:hasMeta,h:'Conectado ao Portfólio para que possamos anunciar com o perfil.'}),
+ AC('ac_pixel','Pixel e eventos',{show:a=>hasMeta(a)&&hasSite(a)}),
+ S('Google',{show:hasGoogle}),
+ AC('ac_gads','Conta Google Ads',{show:hasGoogle,h:'Aceitar o convite da conta de administrador (MCC) da Ritual.'}),
+ AC('ac_ga4','Google Analytics 4',{show:a=>hasGoogle(a)||a.ga4?.v==='sim',h:'Administrador → Gerenciamento de acesso → adicionar e-mail da Ritual.'}),
+ AC('ac_gtm','Google Tag Manager',{show:a=>hasGoogle(a)||a.gtm?.v==='sim'}),
+ AC('ac_gsc','Google Search Console',{show:a=>hasGoogle(a)&&hasSite(a)}),
+ AC('ac_merchant','Merchant Center',{show:a=>hasGoogle(a)&&isEcom(a)}),
+ S('Responsável'),
+ T('resp_acessos','Quem fará a liberação dos acessos?',{req:true,w:1,ph:'Nome'}),T('resp_acessos_ct','Contato dessa pessoa',{req:true,w:1,ph:'E-mail ou WhatsApp'}),
+ TA('obs_final','Algo mais que a Ritual precisa saber?'),
+]},
+{k:'revisao',t:'Revisão',title:'Revise e envie',intro:'Confira se ficou algo obrigatório para trás. Você pode voltar a qualquer etapa.',fields:[]},
+];
+STEPS.forEach(s=>s.fields.forEach(x=>{x.step=s.k}));
+const FIELDS=STEPS.flatMap(s=>s.fields.filter(x=>!x.sec));
+const FBY=Object.fromEntries(FIELDS.map(x=>[x.id,x]));
+const SVC={meta:'Meta Ads',google:'Google Ads',ambos:'Meta + Google'};
+
+const stepOn=(s,a)=>!s.when||s.when(a);
+const fieldOn=(x,a)=>(!x.show||x.show(a))&&stepOn(STEPS.find(s=>s.k===x.step),a);
+function filled(x,a){const v=a[x.id];if(x.t==='asset'||x.t==='acc')return!!(v&&v.v);if(Array.isArray(v))return v.length>0;return v!==undefined&&v!==null&&String(v).trim()!==''}
+function fieldError(x,a){
+ const v=a[x.id];
+ if(x.req&&!filled(x,a))return'Campo obrigatório';
+ if(x.t==='radio'||x.t==='multi'){const o=x.o||[];const has=x.t==='radio'?v==='Outro':(v||[]).includes('Outro');if(o.includes('Outro')&&has&&!String(a[x.id+'_outro']||'').trim())return'Conte qual é a outra opção'}
+ if(!v||v===NS)return'';
+ if(x.t==='email'&&!emailOk(v))return'E-mail inválido';
+ if(x.t==='tel'&&!phoneOk(v))return'Informe DDD + número';
+ if(x.t==='cnpj'&&!cnpjOk(v))return'CNPJ inválido. Confira os números';
+ return'';
+}
+const stepErrors=(s,a)=>s.fields.filter(x=>!x.sec&&fieldOn(x,a)&&fieldError(x,a));
+const activeSteps=a=>STEPS.filter(s=>stepOn(s,a));
+function completion(a){const fs=FIELDS.filter(x=>fieldOn(x,a));const n=fs.filter(x=>filled(x,a)).length;return fs.length?Math.round(n/fs.length*100):0}
+
+/* valor legível */
+function show(x,a){
+ const v=a[x.id];
+ if(x.t==='asset'){if(!v||!v.v)return'';return AL[v.v]+(v.d?' · '+v.d:'')}
+ if(x.t==='acc'){if(!v||!v.v)return'';return ACL[v.v]}
+ if(x.t==='yn')return v?YNL[v]:'';
+ if(x.id==='servicos')return SVC[v]||'';
+ if(v===NS)return'Não sei informar';
+ let out=Array.isArray(v)?v.join(', '):(v??'');
+ if((x.t==='radio'&&v==='Outro')||(x.t==='multi'&&(v||[]).includes('Outro')))out+=' ('+(a[x.id+'_outro']||'')+')';
+ return String(out);
+}
+
+/* =========================================================
+   Inteligência pós-onboarding: pendências e checklists
+   ========================================================= */
+function pendencias(a){
+ const out=[];
+ FIELDS.forEach(x=>{if(!fieldOn(x,a))return;const v=a[x.id];
+  if(x.req&&!filled(x,a))out.push({g:'Obrigatório sem resposta',t:x.l,s:x.step});
+  else if(v===NS||v==='ns'||(v&&v.v==='ns')||(Array.isArray(v)&&v.includes('Não sei informar'))||v==='Não sei informar')out.push({g:'Cliente não soube informar',t:x.l,s:x.step});
+ });
+ ['ticket','margem','taxa_conv','c2','c3','inv_meta','inv_google'].forEach(k=>{const x=FBY[k];if(fieldOn(x,a)&&!filled(x,a))out.push({g:'Informação estratégica em branco',t:x.l,s:x.step})});
+ FIELDS.filter(x=>x.t==='acc'&&fieldOn(x,a)&&a[x.id]?.v==='ajuda').forEach(x=>out.push({g:'Cliente pediu ajuda com acesso',t:x.l,s:'acessos'}));
+ if(a.servicos==='ambos'&&money(a.inv_meta)&&money(a.inv_google)&&money(a.inv_meta)+money(a.inv_google)!==money(a.inv_total))out.push({g:'Inconsistência',t:'Soma Meta + Google difere do investimento total',s:'invest'});
+ if(!filled(FBY.link1,a))out.push({g:'Materiais',t:'Nenhuma pasta de materiais enviada',s:'criativos'});
+ return out;
+}
+function acessosList(a){
+ return FIELDS.filter(x=>x.t==='acc'&&fieldOn(x,a)).map(x=>({id:'ac:'+x.id,t:x.l,plat:FIELDS.indexOf(x)<FIELDS.indexOf(FBY.ac_gads)?'Meta Ads':'Google',w:a[x.id]?.v?'Cliente: '+ACL[a[x.id].v]:'Cliente não respondeu'}));
+}
+function materiaisList(a){
+ const L=[['id_visual','Identidade visual (logo, cores, fontes)'],['manual','Manual de marca'],['fotos','Fotos profissionais'],['videos','Vídeos institucionais'],['depoimentos','Depoimentos de clientes'],['mat_ant','Materiais de campanhas anteriores']];
+ if(hasMeta(a))L.push(['criativos_disp','Criativos de anúncios já existentes']);
+ const r=L.map(([k,t])=>{const v=a[k];return{id:'mt:'+k,t:(v==='sim'?'Receber: ':v==='nao'?'Produzir/planejar: ':'Confirmar: ')+t,w:'Cliente: '+(YNL[v]||'não respondeu')}});
+ const links=['link1','link2','link3'].map(k=>a[k]).filter(Boolean);
+ r.push({id:'mt:links',t:'Organizar pasta de materiais do cliente',w:links.length?links.join('  ·  '):'Nenhum link enviado: solicitar'});
+ return r;
+}
+function checklist(a){
+ const G=[];const g=(n,items)=>{const it=items.filter(Boolean);if(it.length)G.push({n,items:it})};
+ const t=(id,txt,w)=>({id:'tk:'+id,t:txt,w});
+ const st=k=>a[k]?.v;
+ const has=(k,id,ok,no,ns)=>st(k)==='sim'?t(id,ok):st(k)==='nao'?t(id,no,'Cliente não possui'):t(id,ns||ok+' (confirmar se existe)','Cliente não soube informar');
+ const obj=show(FBY.objetivo,a);const dest=show(FBY.meta_destino,a);const prio=a.g_prioridade||[];
+ g('Planejamento',[
+  t('neg','Análise do negócio',a.segmento?show(FBY.segmento,a):''),
+  t('obj','Definição dos objetivos e KPIs',obj&&('Objetivo: '+obj+(a.meta_mensal_d?' · Meta: '+a.meta_mensal_d:''))),
+  t('pub','Definição de público e personas'),
+  t('conc','Análise de concorrentes',[a.c1,a.c2,a.c3].filter(Boolean).join(', ')),
+  ![a.c1,a.c2,a.c3].every(Boolean)&&t('conc2','Levantar concorrentes adicionais','Cliente informou menos de três'),
+  t('canais',a.servicos==='ambos'?'Definir o papel de cada canal (Meta x Google)':'Definir estrutura de campanhas do canal'),
+  t('orc','Distribuição de orçamento',a.inv_total?a.inv_total+'/mês'+(a.inv_meta||a.inv_google?` · Meta ${a.inv_meta||'—'} · Google ${a.inv_google||'—'}`:''):''),
+  a.sazonal==='sim'&&t('saz','Montar calendário sazonal',a.sazonal_d),
+  a.ja_investe&&a.ja_investe!=='Nunca investi'&&t('hist','Analisar histórico de mídia e aprendizados',a.nao_funcionou?'Não funcionou: '+a.nao_funcionou:''),
+  ['Até 2 horas','No mesmo dia','Mais de um dia'].includes(a.tempo_resp)&&t('sla','Alinhar tempo de resposta do atendimento com o cliente','Hoje: '+a.tempo_resp),
+ ]);
+ if(hasMeta(a))g('Meta Ads',[
+  has('meta_bm','bm','Verificação do Portfólio Empresarial','Criar Portfólio Empresarial com o cliente'),
+  has('meta_ads_acc','acc','Verificação da conta de anúncios','Criar conta de anúncios e configurar pagamento'),
+  t('perm','Conferência de permissões (página, Instagram, conta, Pixel)'),
+  st('ig_pro')!=='sim'&&t('igpro','Converter Instagram para conta profissional','Cliente: '+(AL[st('ig_pro')]||'não respondeu')),
+  hasSite(a)&&has('meta_pixel','pixel','Verificação do Pixel','Criar e instalar Pixel da Meta'),
+  hasSite(a)&&has('meta_capi','capi','Verificação da API de Conversões','Configurar API de Conversões'),
+  hasSite(a)&&t('dom','Verificação do domínio no Portfólio'),
+  hasSite(a)&&t('ev',a.meta_eventos==='sim'?'Verificação de eventos de conversão':'Configurar eventos de conversão',a.meta_eventos==='sim'?'':'Cliente: '+(YNL[a.meta_eventos]||'não respondeu')),
+  dest==='WhatsApp'||dest.startsWith('WhatsApp')?t('wa','Configurar campanhas de mensagem para WhatsApp e mensuração de conversas'):null,
+  a.meta_destino==='Formulário instantâneo'&&t('lead','Criar formulário instantâneo e integração com CRM/planilha'),
+  a.catalogo==='sim'&&t('cat','Conectar catálogo de produtos'),
+  a.meta_hist==='sim'&&t('mh','Analisar campanhas anteriores da Meta',a.meta_hist_d),
+  t('camp','Configuração de campanhas',dest&&'Destino: '+dest),
+  t('aud','Preparação de públicos (personalizados, semelhantes e interesses)'),
+ ]);
+ if(hasGoogle(a))g('Google Ads',[
+  has('gads_acc','gacc','Verificação da conta Google Ads','Criar conta Google Ads vinculada ao MCC da Ritual'),
+  hasSite(a)&&t('gconv',a.g_conv==='sim'?'Auditoria das conversões configuradas':'Configuração de conversões',prio.length?'Priorizar: '+prio.join(', '):''),
+  prio.includes('Ligações')&&t('call','Configurar extensões e conversões de chamada'),
+  prio.includes('WhatsApp')&&t('gwa','Rastrear cliques no WhatsApp via GTM'),
+  has('ga4','ga4','Verificação do GA4 e vínculo com Google Ads','Criar propriedade GA4 e vincular ao Google Ads'),
+  has('gtm','gtm','Verificação do GTM','Criar contêiner GTM e instalar no site'),
+  hasSite(a)&&has('gsc','gsc','Verificação do Search Console','Criar e verificar Search Console'),
+  isEcom(a)&&has('merchant','mc','Verificação do Merchant Center e do feed','Criar Merchant Center e feed de produtos'),
+  a.gmn==='sim'?t('gmn','Vincular Perfil da Empresa ao Google Ads'):((a.canais||[]).includes('Loja física')||a.objetivo==='Visitas à loja física')&&t('gmn2','Avaliar criação do Perfil da Empresa no Google','Venda em loja física'),
+  a.gads_hist==='sim'&&t('gh','Analisar histórico de campanhas do Google'),
+  t('kw','Pesquisa de palavras-chave',a.kw_sim?'Sugeridas: '+a.kw_sim:''),
+  t('negkw','Lista de palavras negativas',a.kw_nao),
+  t('gcamp','Configuração de campanhas'),
+  t('gseg','Configuração de públicos e segmentações',a.g_regioes&&'Regiões: '+a.g_regioes),
+ ]);
+ g('Finalização',[
+  t('links','Conferência de links e destinos'),
+  a.resp_prod==='Ritual'&&t('prod','Produção dos criativos pela Ritual'),
+  t('cri','Revisão de criativos',a.restr_com?'Restrições: '+a.restr_com:''),
+  t('txt','Revisão de textos'),
+  t('orc2','Conferência de orçamento e forma de pagamento nas plataformas'),
+  t('apr','Aprovação do cliente',a.aprovador||a.aprovador_g?'Aprovador: '+(a.aprovador||a.aprovador_g):''),
+  t('go','Liberação das campanhas'),
+ ]);
+ return G;
+}
+const STATUS=[['aguardando','Aguardando preenchimento','#6E6E6E'],['recebido','Formulário recebido','#E3010D'],['analise','Em análise','#E8A33C'],['acessos','Aguardando acessos','#C77DFF'],['materiais','Aguardando materiais','#4EA8DE'],['setup','Setup em andamento','#F4D35E'],['concluida','Configuração concluída','#56CFE1'],['pronto','Pronto para iniciar campanhas','#3FBF7F']];
+const STL=Object.fromEntries(STATUS.map(s=>[s[0],s[1]]));const STC=Object.fromEntries(STATUS.map(s=>[s[0],s[2]]));
+
+/* =========================================================
+   Exportação: PDF e código de envio
+   ========================================================= */
+const MARK_A='=====RITUAL-ONBOARDING-INICIO=====',MARK_B='=====RITUAL-ONBOARDING-FIM=====';
+function b64e(s){return btoa(unescape(encodeURIComponent(s)))}
+function b64d(s){return decodeURIComponent(escape(atob(s)))}
+function packet(a,meta){return{v:1,id:meta.id,sentAt:meta.sentAt||Date.now(),answers:a}}
+function textSummary(a,meta){
+ const L=[`ONBOARDING RITUAL · ${a.nome||''}`,`Código: ${meta.id} · ${fmtDT(meta.sentAt)}`,`Canais: ${SVC[a.servicos]||''}`,''];
+ activeSteps(a).forEach(s=>{if(s.k==='revisao'||s.k==='inicio')return;L.push('■ '+s.title.toUpperCase());s.fields.forEach(x=>{if(x.sec||!fieldOn(x,a))return;const v=show(x,a);if(v)L.push(`${x.l}: ${v}`)});L.push('')});
+ L.push('Para a equipe Ritual (não apague):',MARK_A,b64e(JSON.stringify(packet(a,meta))),MARK_B);
+ return L.join('\n');
+}
+function parsePacket(txt){
+ txt=String(txt||'').trim();
+ try{const j=JSON.parse(txt);if(j&&j.answers)return j}catch(e){}
+ const i=txt.indexOf(MARK_A),k=txt.indexOf(MARK_B);
+ if(i>-1&&k>i){try{const j=JSON.parse(b64d(txt.slice(i+MARK_A.length,k).replace(/\s+/g,'')));if(j&&j.answers)return j}catch(e){}}
+ return null;
+}
+function buildPDF(a,meta,internal){
+ const J=window.jspdf&&window.jspdf.jsPDF;if(!J)return null;
+ const d=new J({unit:'pt',format:'a4'});const W=d.internal.pageSize.getWidth(),H=d.internal.pageSize.getHeight(),M=48;let y=0,page=1;
+ const bg=()=>{d.setFillColor(10,10,10);d.rect(0,0,W,H,'F');d.setFontSize(8);d.setTextColor(110);d.text('Ritual · Creative Culture & Growth · somosritual.com.br',M,H-24);d.text(String(page),W-M,H-24,{align:'right'})};
+ const need=h=>{if(y+h>H-50){d.addPage();page++;bg();y=M}};
+ bg();
+ d.setFillColor(227,1,13);d.circle(M+4,M+2,4,'F');d.setTextColor(250);d.setFont('helvetica','bold');d.setFontSize(12);d.text('RITUAL',M+14,M+6);
+ y=M+50;d.setFontSize(24);d.text(d.splitTextToSize(a.nome||'Onboarding',W-2*M),M,y);y+=26;
+ d.setFont('helvetica','normal');d.setFontSize(10);d.setTextColor(166);
+ d.text(`Onboarding de tráfego pago · ${SVC[a.servicos]||''} · Código ${meta.id} · Enviado em ${fmtDT(meta.sentAt)}`,M,y);y+=12;
+ if(internal)d.text(`Status: ${STL[internal.status]||''}  ·  Preenchimento ${completion(a)}%`,M,y),y+=12;
+ y+=14;
+ const sec=t=>{need(40);y+=10;d.setDrawColor(42);d.setLineWidth(.6);d.line(M,y,W-M,y);d.setFillColor(227,1,13);d.rect(M,y-1.5,22,3,'F');y+=20;d.setFont('helvetica','bold');d.setFontSize(13);d.setTextColor(250);d.text(t,M,y);y+=16};
+ const qa=(q,v)=>{d.setFontSize(9.5);const ql=d.splitTextToSize(q,170);const vl=d.splitTextToSize(v||'Não informado',W-2*M-186);const h=Math.max(ql.length,vl.length)*12+8;need(h);d.setFont('helvetica','normal');d.setTextColor(150);d.text(ql,M,y);d.setTextColor(v?235:100);d.text(vl,M+186,y);y+=h};
+ activeSteps(a).forEach(s=>{if(s.k==='revisao')return;sec(s.title);s.fields.forEach(x=>{if(x.sec||!fieldOn(x,a))return;qa(x.l,show(x,a))})});
+ if(internal){
+  const ck=internal.checks||{};
+  const list=(title,items)=>{sec(title);items.forEach(i=>qa((ck[i.id]?'[x] ':'[  ] ')+i.t,i.w||''))};
+  const p=pendencias(a);sec('Pendências');if(!p.length)qa('Nenhuma pendência','');p.forEach(i=>qa(i.g,i.t));
+  list('Checklist de acessos',acessosList(a));list('Checklist de materiais',materiaisList(a));
+  checklist(a).forEach(gp=>list('Checklist técnico · '+gp.n,gp.items));
+  if(internal.notes){sec('Observações internas');qa('Notas',internal.notes)}
+ }
+ return d.output('blob');
+}
+const slug=s=>String(s||'cliente').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-zA-Z0-9]+/g,'-').replace(/^-|-$/g,'').toLowerCase()||'cliente';
+async function save(filename,data){
+ const dl=await use('downloads');
+ if(!dl){try{const u=URL.createObjectURL(data instanceof Blob?data:new Blob([data],{type:'application/json'}));const a=document.createElement('a');a.href=u;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);return true}catch(e){toast('Download indisponível aqui. Use “Copiar respostas”.');return false}}
+ try{await dl.save({filename,data});return true}catch(e){if(e&&e.code!=='declined')toast('Não foi possível baixar o arquivo');return false}
+}
+
+/* =========================================================
+   Estado
+   ========================================================= */
+let DB=null,USER=null,CAN=false,CONFIG={whatsapp:'',email:''};
+const st={a:{},step:0,visited:0,meta:{id:uid()},sent:false};
+const draft=LS.get('ritual-onb-draft');if(draft&&draft.a){Object.assign(st,draft);}
+let saveT;function persist(){const el=$('#saveind');if(el){el.classList.add('busy');el.textContent='Salvando…'}clearTimeout(saveT);saveT=setTimeout(()=>{LS.set('ritual-onb-draft',{a:st.a,step:st.step,visited:st.visited,meta:st.meta,sent:st.sent});const e=$('#saveind');if(e){e.classList.remove('busy');e.textContent='Rascunho salvo neste navegador'}},400)}
+
+/* =========================================================
+   Formulário público
+   ========================================================= */
+const ICONS={meta:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E3010D" stroke-width="2"><path d="M3 15c0-5 2.5-9 5-9 3 0 5 9 8 9 2 0 3-2 3-5"/><path d="M21 9c0 5-2.5 9-5 9-3 0-5-9-8-9-2 0-3 2-3 5"/></svg>',google:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E3010D" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>',ambos:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E3010D" stroke-width="2"><circle cx="8" cy="12" r="5"/><circle cx="16" cy="12" r="5"/></svg>'};
+function fieldHTML(x){
+ const a=st.a;if(x.sec)return`<div class="sec mk"><h3>${esc(x.sec)}</h3></div>`;
+ if(x.pre&&!filled(x,a)&&a[x.pre]&&a[x.pre]!==NS)a[x.id]=a[x.pre];
+ const v=a[x.id];const req=x.req?'<span class="req" aria-hidden="true">*</span>':'<span class="opt">opcional</span>';
+ const help=x.h?`<p class="help" id="h-${x.id}">${esc(x.h)}</p>`:'';
+ const lab=`<label for="i-${x.id}">${esc(x.l)}${req}</label>`;
+ const lb=`<div class="lb" id="l-${x.id}">${esc(x.l)}${req}</div>`;
+ const em=`<div class="emsg" id="e-${x.id}"></div>`;
+ const wrap=(inner,useLb)=>`<div class="f" data-f="${x.id}">${useLb?lb:lab}${help}${inner}${em}</div>`;
+ const chips=(opts,sel,multi,attr='o')=>`<div class="chips" role="group" aria-labelledby="l-${x.id}">${opts.map(([k,l])=>`<button type="button" class="chip${k==='ns'||l==='Não sei informar'?' ns':''}" data-${attr}="${esc(k)}" aria-pressed="${multi?(sel||[]).includes(k):sel===k}">${esc(l)}</button>`).join('')}</div>`;
+ switch(x.t){
+  case'radio':{
+   if(x.svc)return`<div class="f" data-f="${x.id}">${lb}${help}<div class="svc">${['meta','google','ambos'].map(k=>`<button type="button" data-o="${k}" aria-pressed="${v===k}"><span class="ic">${ICONS[k]}</span><b>${SVC[k]}</b><span>${k==='meta'?'Facebook e Instagram':k==='google'?'Pesquisa, YouTube, Display e Shopping':'Os dois canais integrados'}</span></button>`).join('')}</div>${em}</div>`;
+   const other=v==='Outro'?`<input class="in" style="margin-top:10px" data-other="${x.id}" value="${esc(a[x.id+'_outro']||'')}" placeholder="Qual?">`:'';
+   return wrap(chips(x.o.map(o=>[o,o]),v,false)+other,true)}
+  case'multi':{const other=(v||[]).includes('Outro')?`<input class="in" style="margin-top:10px" data-other="${x.id}" value="${esc(a[x.id+'_outro']||'')}" placeholder="Qual?">`:'';
+   return wrap(chips(x.o.map(o=>[o,o]),v||[],true)+other+'<p class="help" style="margin:8px 0 0">Pode marcar mais de uma.</p>',true)}
+  case'yn':return wrap(chips(YN.map(k=>[k,YNL[k]]),v,false),true);
+  case'asset':case'acc':{const L=x.t==='asset'?AL:ACL;const vv=v||{};
+   const det=x.t==='asset'&&vv.v==='sim'?`<input class="in det" data-det="${x.id}" value="${esc(vv.d||'')}" placeholder="${esc(x.ph||'Link ou informação adicional')}" aria-label="Detalhes: ${esc(x.l)}">`:'';
+   return`<div class="asset" data-f="${x.id}"><div class="hd"><div><div class="nm" id="l-${x.id}">${esc(x.l)}</div>${x.h?`<div class="hp">${esc(x.h)}</div>`:''}</div>${chips(Object.entries(L),vv.v,false)}</div>${det}${em}</div>`}
+  case'area':return wrap(`<textarea class="in" id="i-${x.id}" data-i="${x.id}" placeholder="${esc(x.ph||'')}" ${v===NS?'disabled':''}>${esc(v===NS?'':v||'')}</textarea>`+nsBox(x,v));
+  default:{const type={email:'email',tel:'tel',url:'url',num:'number'}[x.t]||'text';const im={tel:'tel',cnpj:'numeric',money:'numeric',num:'numeric'}[x.t];
+   return wrap(`<input class="in" id="i-${x.id}" data-i="${x.id}" type="${type}" ${im?`inputmode="${im}"`:''} ${x.t==='email'?'autocomplete="email"':''} ${x.t==='num'?'min="0"':''} value="${esc(v===NS?'':v||'')}" placeholder="${esc(x.ph||'')}" ${v===NS?'disabled':''}>`+nsBox(x,v))}
+ }
+}
+const nsBox=(x,v)=>x.ns?`<label class="nsbox"><input type="checkbox" data-ns="${x.id}" ${v===NS?'checked':''}> Não sei informar</label>`:'';
+function renderFields(s){
+ const a=st.a;let h='',buf=[];
+ const flush=()=>{if(buf.length){h+=`<div class="row2">${buf.join('')}</div>`;buf=[]}};
+ s.fields.forEach(x=>{if(x.show&&!x.show(a))return;const html=fieldHTML(x);if(x.w)buf.push(html);else{flush();h+=html}});flush();return h;
+}
+function renderForm(){
+ const a=st.a;const steps=activeSteps(a);if(st.step>=steps.length)st.step=steps.length-1;
+ const s=steps[st.step];const pct=Math.round(st.step/(steps.length-1)*100);
+ const railItems=steps.map((x,i)=>{const done=i<st.step||(i<=st.visited&&i!==st.step&&!stepErrors(x,a).length&&i<steps.length-1);return`<li class="${i===st.step?'cur':''} ${done?'done':''}"><button type="button" data-go="${i}" ${i>st.visited?'disabled':''}><span class="dot">${done?'✓':i+1}</span>${esc(x.t)}</button></li>`}).join('');
+ let body;
+ if(st.sent)body=doneHTML();
+ else if(s.k==='revisao')body=reviewHTML(steps);
+ else body=`${st.step===0?`<div class="facts"><span><b>${activeSteps(a).length-2} etapas</b> curtas</span><span>Cerca de <b>20 minutos</b></span><span>Rascunho <b>salvo automaticamente</b></span><span><b>Sem senhas</b>: acessos por convite</span></div>`:''}
+  ${s.note?`<div class="note">${s.note}</div>`:''}<form id="frm" novalidate>${renderFields(s)}</form>
+  <div class="nav"><button class="btn ghost" type="button" id="prev" ${st.step===0?'disabled':''}>Voltar</button><button class="btn pri" type="button" id="next">${st.step===steps.length-2?'Revisar':'Continuar'}</button></div>`;
+ $('#app').innerHTML=`<div class="shell"><aside class="rail" id="rail"><div class="logo"><i></i>ritual <small>onboarding</small></div><ol class="steps"><span class="fill" style="height:calc(${pct}% - 16px)"></span>${railItems}</ol><div class="rail-foot"><div class="save" id="saveind">Rascunho salvo neste navegador</div><p>Dúvidas? Fale com a equipe Ritual${CONFIG.whatsapp?': '+esc(CONFIG.whatsapp):'.'}</p>${CAN?'<p><a href="#painel">Área da equipe →</a></p>':''}</div></aside>
+ <div class="topbar"><button class="btn sm" type="button" id="menu" aria-label="Ver etapas">☰</button><div class="t">Etapa ${st.step+1} de ${steps.length}<b>${esc(s.t)}</b></div><span class="tag">${completion(a)}%</span><span class="pb" style="width:${pct}%"></span></div>
+ <main class="main"><p class="eyebrow">${st.sent?'Onboarding enviado':`Etapa ${st.step+1} de ${steps.length} · ${esc(s.t)}`}</p>${st.sent?'':`<div class="mk" style="padding-top:22px"><h1>${esc(s.title)}</h1></div><p class="lead">${esc(s.intro)}</p>`}${body}</main></div>`;
+ bindForm();
+}
+function reviewHTML(steps){
+ const a=st.a;const rows=steps.slice(0,-1).map((s,i)=>{const e=stepErrors(s,a);return`<li><span><b>${esc(s.t)}</b><br><span class="help" style="margin:0">${e.length?esc(e.map(x=>x.l).slice(0,3).join(' · '))+(e.length>3?'…':''):'Completa'}</span></span>${e.length?`<button class="btn sm" data-go="${i}">Completar (${e.length})</button>`:'<span class="tag ok">✓ ok</span>'}</li>`}).join('');
+ const blocked=steps.slice(0,-1).some(s=>stepErrors(s,a).length);
+ return`<ul class="rev">${rows}</ul><div class="note">Ao enviar, você recebe um <b>código de respostas</b> para mandar à Ritual pelo WhatsApp ou e-mail, e pode baixar uma cópia em PDF.</div>
+ <div class="nav"><button class="btn ghost" id="prev">Voltar</button><button class="btn pri" id="send" ${blocked?'disabled':''}>Enviar onboarding</button></div>${blocked?'<p class="help" style="text-align:right;margin-top:10px">Complete os itens obrigatórios para enviar.</p>':''}`;
+}
+function doneHTML(){
+ const a=st.a;const direct=st.meta.direct;
+ const wa=digits(CONFIG.whatsapp);
+ return`<div class="hero-done"><div class="big-check"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M5 12l5 5 9-10"/></svg></div>
+ <h1>Pronto, ${esc((a.resp||'').split(' ')[0]||'tudo certo')}. O ritual começou.</h1>
+ <p class="lead">${direct?'Suas respostas já chegaram à equipe da Ritual.':'Falta um passo: envie o código de respostas para a equipe da Ritual. É assim que suas respostas chegam até nós com segurança.'}</p>
+ <div class="card" style="margin-bottom:20px"><p class="eyebrow" style="margin:0">Código do onboarding</p><p style="font-size:26px;font-weight:700;margin:4px 0 0;letter-spacing:.02em">${esc(st.meta.id)}</p></div>
+ ${direct?'':`<div class="card" style="margin-bottom:20px"><h3>Envie para a Ritual</h3><p class="help">1. Toque em “Copiar respostas”. 2. Cole na conversa com a Ritual${CONFIG.whatsapp?` (WhatsApp ${esc(CONFIG.whatsapp)})`:''}${CONFIG.email?` ou no e-mail ${esc(CONFIG.email)}`:''}.</p>
+ <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn pri" id="cp">Copiar respostas</button>${wa?`<a class="btn" href="https://wa.me/${wa}" target="_blank" rel="noopener">Abrir WhatsApp da Ritual</a>`:''}<button class="btn" id="dj">Baixar arquivo (.json)</button></div></div>`}
+ <div class="card" style="margin-bottom:20px"><h3>O que acontece agora</h3><ol class="help" style="padding-left:18px;margin:8px 0 0"><li>A equipe analisa suas respostas.</li><li>Você recebe o passo a passo para liberar os acessos, sem compartilhar senhas.</li><li>Configuramos rastreamento, públicos e campanhas.</li><li>Você aprova e as campanhas vão ao ar.</li></ol></div>
+ <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" id="pdf">Baixar cópia em PDF</button><button class="btn ghost" id="edit">Editar respostas</button><button class="btn ghost" id="novo">Começar um novo onboarding</button></div></div>`;
+}
+function setVal(id,v){st.a[id]=v;persist()}
+function bindForm(){
+ const app=$('#app');const steps=activeSteps(st.a);
+ app.onclick=async e=>{
+  const b=e.target.closest('button,a');if(!b)return;
+  if(b.dataset.go!==undefined){st.step=+b.dataset.go;$('#rail').classList.remove('open');renderForm();scrollTo(0,0);return}
+  if(b.id==='menu'){$('#rail').classList.toggle('open');return}
+  const fw=b.closest('[data-f]');
+  if(b.dataset.o!==undefined&&fw){const x=FBY[fw.dataset.f];const k=b.dataset.o;
+   if(x.t==='multi'){let arr=[...(st.a[x.id]||[])];if(k==='Não sei informar')arr=arr.includes(k)?[]:[k];else{arr=arr.filter(q=>q!=='Não sei informar');arr=arr.includes(k)?arr.filter(q=>q!==k):[...arr,k]}setVal(x.id,arr)}
+   else if(x.t==='asset'||x.t==='acc'){const cur=st.a[x.id]||{};setVal(x.id,{...cur,v:cur.v===k?'':k})}
+   else setVal(x.id,st.a[x.id]===k&&!x.req?'':k);
+   const y=scrollY;renderForm();scrollTo(0,y);const nb=document.querySelector(`[data-f="${x.id}"] [data-o="${CSS.escape(k)}"]`);nb&&nb.focus({preventScroll:true});return}
+  if(b.id==='prev'){st.step=Math.max(0,st.step-1);persist();renderForm();scrollTo(0,0);return}
+  if(b.id==='next'){const s=steps[st.step];const errs=stepErrors(s,st.a);document.querySelectorAll('.f.err,.asset.err').forEach(n=>n.classList.remove('err'));
+   if(errs.length){errs.forEach(x=>{const n=document.querySelector(`[data-f="${x.id}"]`);if(n){n.classList.add('err');n.querySelector('.emsg').textContent=fieldError(x,st.a)}});const first=document.querySelector('.err');first&&first.scrollIntoView({behavior:'smooth',block:'center'});const inp=first&&first.querySelector('input,textarea,button');inp&&inp.focus({preventScroll:true});toast(errs.length===1?'Falta 1 campo nesta etapa':`Faltam ${errs.length} campos nesta etapa`);return}
+   st.step++;st.visited=Math.max(st.visited,st.step);persist();renderForm();scrollTo(0,0);return}
+  if(b.id==='send')return submit();
+  if(b.id==='cp')return copy(textSummary(st.a,st.meta));
+  if(b.id==='dj')return save(`onboarding-ritual-${slug(st.a.nome)}.json`,JSON.stringify(packet(st.a,st.meta),null,1));
+  if(b.id==='pdf'){const blob=buildPDF(st.a,st.meta);if(!blob)return toast('Gerador de PDF ainda carregando, tente de novo');return save(`onboarding-ritual-${slug(st.a.nome)}.pdf`,blob)}
+  if(b.id==='edit'){st.sent=false;st.step=activeSteps(st.a).length-1;persist();renderForm();return}
+  if(b.id==='novo'){openModal(`<h2>Começar um novo onboarding?</h2><p class="help">As respostas atuais serão apagadas deste navegador. Copie ou baixe antes, se precisar.</p><div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px"><button class="btn ghost" data-close>Cancelar</button><button class="btn pri" id="okNovo">Apagar e começar</button></div>`);$('#okNovo').onclick=()=>{LS.del('ritual-onb-draft');Object.assign(st,{a:{},step:0,visited:0,meta:{id:uid()},sent:false});closeModal();renderForm()};return}
+ };
+ app.oninput=e=>{const el=e.target;
+  if(el.dataset.i){const x=FBY[el.dataset.i];let v=el.value;
+   if(x.t==='cnpj')v=el.value=maskCnpj(v);if(x.t==='tel')v=el.value=maskPhone(v);if(x.t==='money')v=el.value=maskMoney(v);
+   st.a[x.id]=v;persist();const n=el.closest('.f');if(n&&n.classList.contains('err')&&!fieldError(x,st.a))n.classList.remove('err');
+  }
+  if(el.dataset.other){st.a[el.dataset.other+'_outro']=el.value;persist()}
+  if(el.dataset.det){const cur=st.a[el.dataset.det]||{};st.a[el.dataset.det]={...cur,d:el.value};persist()}
+ };
+ app.onchange=e=>{const el=e.target;
+  if(el.dataset.ns){const id=el.dataset.ns;setVal(id,el.checked?NS:'');const y=scrollY;renderForm();scrollTo(0,y)}
+  if(el.dataset.i){const x=FBY[el.dataset.i];const n=el.closest('.f');const er=st.a[x.id]&&fieldError(x,st.a);if(n){n.classList.toggle('err',!!er);if(er)n.querySelector('.emsg').textContent=er}
+   if(['site'].includes(x.id)){const y=scrollY;renderForm();scrollTo(0,y)}}
+ };
+}
+async function submit(){
+ st.meta.sentAt=Date.now();
+ if(DB&&CAN){
+  try{const ref=DB.doc('clients/'+st.meta.id);const ex=await ref.get();const base=ex.exists?ex.data():{};
+   await ref.set({...base,id:st.meta.id,answers:st.a,name:st.a.nome||'',services:st.a.servicos||'',email:st.a.email||'',cnpj:digits(st.a.cnpj),status:base.status&&base.status!=='aguardando'?base.status:'recebido',source:'form',createdAt:base.createdAt||Date.now(),submittedAt:st.meta.sentAt,updatedAt:Date.now(),history:[...(base.history||[]),{s:'recebido',at:Date.now(),by:'Formulário'}]});
+   st.meta.direct=true}catch(e){st.meta.direct=false}
+ }
+ st.sent=true;persist();renderForm();scrollTo(0,0);
+}
+
+/* =========================================================
+   Modal
+   ========================================================= */
+function openModal(h){$('#modalc').innerHTML=h;$('#modal').classList.add('on');const f=$('#modalc').querySelector('input,textarea,button');f&&f.focus()}
+function closeModal(){$('#modal').classList.remove('on');if(location.hash==='#painel')renderPanel()}
+$('#modal').addEventListener('click',e=>{if(e.target.id==='modal'||e.target.closest('[data-close]'))closeModal()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+
+/* =========================================================
+   Painel interno
+   ========================================================= */
+const PN={clients:[],loaded:false,filter:'',q:'',open:null,tab:'resumo',unsub:null,err:''};
+function subscribePanel(){
+ if(PN.unsub||!DB)return;
+ const timer=setTimeout(()=>{if(!PN.loaded){PN.err='Os dados ainda não responderam. Verifique a conexão.';renderPanel()}},10000);
+ PN.unsub=DB.collection('clients').onSnapshot(snap=>{PN.clients=snap.docs.map(d=>({...d.data(),_id:d.id}));if(!snap.metadata.fromCache){clearTimeout(timer);PN.err=''}PN.loaded=true;const ae=document.activeElement;if(location.hash==='#painel'&&!(ae&&(ae.id==='notes'||ae.id==='q'))&&!$('#modal').classList.contains('on'))renderPanel()},e=>{clearTimeout(timer);PN.err='Não foi possível carregar os onboardings ('+(e&&e.code||'erro')+').';PN.loaded=true;renderPanel()});
+ DB.doc('config/main').get().then(s=>{if(s.exists)CONFIG={...CONFIG,...s.data()}}).catch(()=>{});
+}
+function clientCalc(c){const a=c.answers||{};const ck=c.checks||{};
+ const ac=acessosList(a),mt=materiaisList(a),tk=checklist(a).flatMap(g=>g.items);
+ const cnt=l=>l.filter(i=>ck[i.id]).length;
+ return{a,ac,mt,tk,pend:c.answers?pendencias(a):[],pAc:cnt(ac),pMt:cnt(mt),pTk:cnt(tk),comp:c.answers?completion(a):0};
+}
+function suggestStatus(c,k){if(!c.answers)return'aguardando';if(k.pAc<k.ac.length)return'acessos';if(k.pMt<k.mt.length)return'materiais';if(k.pTk===0)return'analise';if(k.pTk<k.tk.length)return'setup';return'pronto'}
+async function writeClient(c,patch,hist){
+ if(!DB)return toast('Banco de dados indisponível');
+ const ref=DB.doc('clients/'+c._id);
+ const data={...patch,updatedAt:Date.now()};if(hist)data.history=[...(c.history||[]),hist];
+ try{await ref.update(data)}catch(e){toast(e&&e.code==='invalid_argument'?'Sem permissão para editar':'Falha ao salvar');throw e}
+}
+function renderPanel(){
+ if(!CAN){$('#app').innerHTML=`<div class="pn"><div class="pn-top"><div class="logo"><i></i>ritual <small>painel</small></div></div><div class="empty"><h2>Área restrita à equipe Ritual</h2><p>Entre com a conta da Ritual para acompanhar os onboardings.</p><p><a href="#">Voltar ao formulário</a></p></div></div>`;return}
+ if(PN.open){return renderDetail()}
+ const rows=PN.clients.map(c=>({c,k:clientCalc(c)}));
+ const counts=Object.fromEntries(STATUS.map(s=>[s[0],0]));rows.forEach(r=>counts[r.c.status||'recebido']++);
+ const q=PN.q.toLowerCase();
+ const list=rows.filter(r=>(!PN.filter||r.c.status===PN.filter)&&(!q||[r.c.name,r.c.id,r.c.email,r.c.cnpj].join(' ').toLowerCase().includes(q))).sort((x,y)=>(y.c.updatedAt||0)-(x.c.updatedAt||0));
+ $('#app').innerHTML=`<div class="pn">
+ <div class="pn-top"><div class="logo"><i></i>ritual <small>painel de onboarding</small></div><div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn ghost sm" href="#">Ver formulário</a><button class="btn sm" id="cfg">Contato da Ritual</button><button class="btn sm" id="imp">Importar respostas</button><button class="btn pri sm" id="novo">Novo cliente</button></div></div>
+ <div class="mk" style="padding-top:22px;margin-bottom:24px"><h1 style="font-size:clamp(28px,3.4vw,40px)">${rows.length?`${rows.length} onboarding${rows.length>1?'s':''} em andamento, ${counts.pronto} pronto${counts.pronto===1?'':'s'} para rodar`:'Nenhum onboarding ainda'}</h1></div>
+ <div class="kpis">${STATUS.map(([k,l,c])=>`<button class="kpi" data-st="${k}" aria-pressed="${PN.filter===k}" style="--c:${c}"><b>${counts[k]}</b><span class="st" style="--c:${c}">${l}</span></button>`).join('')}</div>
+ <div class="tools"><input class="in" id="q" placeholder="Buscar cliente, código, e-mail, CNPJ" value="${esc(PN.q)}">${PN.filter?`<button class="btn sm ghost" data-st="">Limpar filtro: ${esc(STL[PN.filter])}</button>`:''}</div>
+ ${PN.err?`<div class="note">${esc(PN.err)}</div>`:''}
+ ${!PN.loaded?'<div class="empty">Carregando onboardings…</div>':list.length?`<table class="stack"><thead><tr><th>Cliente</th><th>Canais</th><th>Enviado</th><th>Status</th><th>Pendências</th><th>Setup</th></tr></thead><tbody>${list.map(({c,k})=>`<tr data-open="${esc(c._id)}" tabindex="0"><td><b>${esc(c.name||'Sem nome')}</b><br><span class="help" style="margin:0;font-size:13px">${esc(c.id||c._id)}</span></td><td>${esc(SVC[c.services]||'—')}</td><td style="white-space:nowrap">${c.submittedAt?fmtDate(c.submittedAt):'<span class="tag">não enviado</span>'}</td><td><span class="st" style="--c:${STC[c.status]||'#666'}">${esc(STL[c.status]||'—')}</span></td><td>${c.answers?(k.pend.length?`<span class="tag w">${k.pend.length}</span>`:'<span class="tag ok">0</span>'):'—'}</td><td>${c.answers?`<div class="meter" title="${k.pTk} de ${k.tk.length}"><i style="width:${k.tk.length?k.pTk/k.tk.length*100:0}%"></i></div>`:'—'}</td></tr>`).join('')}</tbody></table>`:`<div class="empty">${rows.length?'Nenhum cliente neste filtro.':'Quando um cliente enviar o código de respostas, use <b>Importar respostas</b>. Para registrar um cliente que ainda vai preencher, use <b>Novo cliente</b>.'}</div>`}
+ </div>`;
+ bindPanel();
+}
+function bindPanel(){
+ const app=$('#app');
+ app.onclick=e=>{const b=e.target.closest('button,tr[data-open]');if(!b)return;
+  if(b.dataset.open){PN.open=b.dataset.open;PN.tab='resumo';renderPanel();scrollTo(0,0);return}
+  if(b.dataset.st!==undefined){PN.filter=PN.filter===b.dataset.st?'':b.dataset.st;renderPanel();return}
+  if(b.id==='novo')return modalNovo();
+  if(b.id==='imp')return modalImport();
+  if(b.id==='cfg')return modalCfg();
+ };
+ app.onkeydown=e=>{if(e.key==='Enter'&&e.target.dataset.open){PN.open=e.target.dataset.open;renderPanel()}};
+ const q=$('#q');if(q)q.oninput=()=>{PN.q=q.value;clearTimeout(q.t);q.t=setTimeout(()=>{renderPanel();const n=$('#q');n.focus();n.setSelectionRange(n.value.length,n.value.length)},250)};
+}
+function modalCfg(){openModal(`<h2>Contato da Ritual</h2><p class="help">Aparece para o cliente na tela final, para ele saber para onde enviar o código de respostas.</p>
+ <div class="f"><label for="cw">WhatsApp da Ritual</label><input class="in" id="cw" value="${esc(CONFIG.whatsapp||'')}" placeholder="(11) 90000-0000"></div>
+ <div class="f"><label for="ce">E-mail da Ritual</label><input class="in" id="ce" value="${esc(CONFIG.email||'')}" placeholder="onboarding@somosritual.com.br"></div>
+ <div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn ghost" data-close>Cancelar</button><button class="btn pri" id="okc">Salvar</button></div>`);
+ $('#cw').oninput=e=>e.target.value=maskPhone(e.target.value);
+ $('#okc').onclick=async()=>{const d={whatsapp:$('#cw').value.trim(),email:$('#ce').value.trim()};if(d.email&&!emailOk(d.email))return toast('E-mail inválido');try{await DB.doc('config/main').set(d);CONFIG=d;closeModal();toast('Contato salvo')}catch(e){toast('Só editores podem alterar o contato')}};
+}
+function modalNovo(){openModal(`<h2>Novo cliente</h2><p class="help">Registra o cliente como “Aguardando preenchimento”. Quando ele enviar o código, a importação encontra este cadastro pelo e-mail ou CNPJ.</p>
+ <div class="f"><label for="nn">Nome da empresa<span class="req">*</span></label><input class="in" id="nn"></div>
+ <div class="row2"><div class="f"><label for="ne">E-mail do responsável</label><input class="in" id="ne" type="email"></div><div class="f"><label for="nc">CNPJ</label><input class="in" id="nc" inputmode="numeric"></div></div>
+ <div class="f"><div class="lb">Canais contratados</div><div class="chips" id="ns">${Object.entries(SVC).map(([k,l],i)=>`<button type="button" class="chip" data-v="${k}" aria-pressed="${i===2}">${l}</button>`).join('')}</div></div>
+ <div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn ghost" data-close>Cancelar</button><button class="btn pri" id="okn">Registrar</button></div>`);
+ $('#nc').oninput=e=>e.target.value=maskCnpj(e.target.value);
+ $('#ns').onclick=e=>{const b=e.target.closest('[data-v]');if(!b)return;$('#ns').querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed',c===b))};
+ $('#okn').onclick=async()=>{const name=$('#nn').value.trim();if(!name)return toast('Informe o nome da empresa');const em=$('#ne').value.trim();if(em&&!emailOk(em))return toast('E-mail inválido');
+  const id=uid();const svc=$('#ns [aria-pressed=true]').dataset.v;
+  try{await DB.doc('clients/'+id).set({id,name,email:em,cnpj:digits($('#nc').value),services:svc,status:'aguardando',source:'manual',createdAt:Date.now(),updatedAt:Date.now(),checks:{},notes:'',history:[{s:'aguardando',at:Date.now(),by:'Cadastro manual'}]});closeModal();toast('Cliente registrado');
+   const link=PUBLIC_URL;openModal(`<h2>Envie o formulário para ${esc(name)}</h2><p class="help">Mensagem pronta para WhatsApp ou e-mail:</p><textarea class="in" id="msg" readonly style="min-height:150px">${esc(inviteMsg(name,link))}</textarea><div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px"><button class="btn ghost" data-close>Fechar</button><button class="btn pri" id="cpm">Copiar mensagem</button></div>`);$('#cpm').onclick=()=>copy($('#msg').value)}catch(e){toast('Sem permissão para registrar clientes')}};
+}
+const PUBLIC_URL='https://somosritual.com.br/onboarding';
+const inviteMsg=(name,link)=>`Olá! Que bom ter a ${name} com a Ritual.\n\nPara começarmos o planejamento e o setup das suas campanhas, preencha nosso onboarding (cerca de 20 minutos, salva automaticamente):\n${link||'[link do formulário]'}\n\nNo final, é só copiar o código de respostas e mandar aqui. Não pedimos senhas: os acessos serão liberados depois por convite oficial das plataformas.`;
+function modalImport(){openModal(`<h2>Importar respostas</h2><p class="help">Cole a mensagem que o cliente enviou (com o código no final) ou selecione o arquivo .json.</p>
+ <textarea class="in" id="it" placeholder="Cole aqui a mensagem completa do cliente" style="min-height:160px"></textarea>
+ <p style="margin:12px 0"><label class="btn sm" style="cursor:pointer">Selecionar arquivo .json<input type="file" id="if" accept=".json,application/json,text/plain" hidden></label> <span class="help" id="ifn"></span></p>
+ <div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn ghost" data-close>Cancelar</button><button class="btn pri" id="oki">Importar</button></div>`);
+ $('#if').onchange=async e=>{const fl=e.target.files[0];if(!fl)return;$('#it').value=await fl.text();$('#ifn').textContent=fl.name};
+ $('#oki').onclick=async()=>{const p=parsePacket($('#it').value);if(!p)return toast('Código não reconhecido. Confira se a mensagem veio completa.');
+  const a=p.answers;const cn=digits(a.cnpj),em=String(a.email||'').toLowerCase();
+  const match=PN.clients.find(c=>c.id===p.id)||PN.clients.find(c=>!c.answers&&((cn&&c.cnpj===cn)||(em&&String(c.email||'').toLowerCase()===em)));
+  const id=match?match._id:(p.id&&/^RTL-[\w-]+$/.test(p.id)?p.id:uid());
+  const base=match||{};const now=Date.now();
+  const doc={...base,id:base.id||id,answers:a,name:a.nome||base.name||'',services:a.servicos||base.services||'',email:a.email||'',cnpj:cn,status:base.status&&base.status!=='aguardando'?base.status:'recebido',source:'import',createdAt:base.createdAt||now,submittedAt:p.sentAt||now,updatedAt:now,checks:base.checks||{},notes:base.notes||'',history:[...(base.history||[]),{s:'recebido',at:now,by:match&&match.answers?'Respostas atualizadas':'Importação'}]};
+  delete doc._id;
+  try{await DB.doc('clients/'+id).set(doc);closeModal();toast(match?'Respostas vinculadas a '+(doc.name):'Onboarding importado');PN.open=id;PN.tab='resumo';renderPanel()}catch(e){toast('Sem permissão para importar')}};
+}
+function renderDetail(){
+ const c=PN.clients.find(x=>x._id===PN.open);if(!c){PN.open=null;return renderPanel()}
+ const k=clientCalc(c);const a=k.a;const ck=c.checks||{};const sug=suggestStatus(c,k);
+ const tabs=[['resumo','Resumo'],['respostas','Respostas'],['pend','Pendências ('+k.pend.length+')'],['acessos','Acessos'],['materiais','Materiais'],['tecnico','Checklist técnico']];
+ const ckList=(items)=>items.map(i=>`<label class="ck ${ck[i.id]?'on':''}"><input type="checkbox" data-ck="${esc(i.id)}" ${ck[i.id]?'checked':''}><span><span class="t">${esc(i.t)}</span>${i.w?`<span class="w">${esc(i.w)}</span>`:''}</span></label>`).join('');
+ let body='';
+ if(!c.answers)body=`<div class="empty">Este cliente ainda não enviou o onboarding.<br><br><button class="btn sm" id="sendmsg">Copiar mensagem com o link</button> <button class="btn sm" id="imp">Importar respostas</button></div>`;
+ else if(PN.tab==='resumo'){const x=(id)=>esc(show(FBY[id],a)||'—');
+  body=`<div class="card" style="margin-bottom:16px"><p class="help" style="margin:0 0 6px">Descrição</p><p style="margin:0">${esc(a.descricao||'—')}</p></div>
+  <div class="qa"><div class="q">Objetivo principal</div><div class="a">${x('objetivo')}</div></div>
+  <div class="qa"><div class="q">Resultado esperado em 90 dias</div><div class="a">${x('resultado90')}</div></div>
+  <div class="qa"><div class="q">Prioridade de divulgação</div><div class="a">${x('prioritarios')}</div></div>
+  <div class="qa"><div class="q">Investimento em mídia</div><div class="a">${x('inv_total')}/mês${a.servicos==='ambos'?` · Meta ${x('inv_meta')} · Google ${x('inv_google')}`:''} · Aprovado: ${x('inv_aprovado')}</div></div>
+  <div class="qa"><div class="q">Ticket médio · margem</div><div class="a">${x('ticket')} · ${x('margem')}</div></div>
+  ${hasMeta(a)?`<div class="qa"><div class="q">Destino Meta</div><div class="a">${x('meta_destino')}</div></div>`:''}
+  ${hasGoogle(a)?`<div class="qa"><div class="q">Prioridade Google</div><div class="a">${x('g_prioridade')}</div></div>`:''}
+  <div class="qa"><div class="q">Cliente ideal</div><div class="a">${x('cliente_ideal')}</div></div>
+  <div class="qa"><div class="q">Atendimento</div><div class="a">${x('canal_atend')} · ${x('recebe_leads')} · resposta: ${x('tempo_resp')}</div></div>
+  <div class="qa"><div class="q">Contato</div><div class="a">${x('resp')} (${x('cargo')}) · ${x('email')} · ${x('whats')}</div></div>
+  <div class="qa"><div class="q">Liberação de acessos</div><div class="a">${x('resp_acessos')} · ${x('resp_acessos_ct')}</div></div>`}
+ else if(PN.tab==='respostas')body=activeSteps(a).filter(s=>s.k!=='revisao').map(s=>`<div class="grp"><div class="mk" style="margin:18px 0 6px"><h3>${esc(s.title)}</h3></div>${s.fields.filter(x=>!x.sec&&fieldOn(x,a)).map(x=>{const v=show(x,a);const isLink=/^https:\/\//.test(v);return`<div class="qa"><div class="q">${esc(x.l)}</div><div class="a ${v?'':'no'}">${isLink?`<a href="${esc(v)}" target="_blank" rel="noopener">${esc(v)}</a>`:esc(v||'Não informado')}</div></div>`}).join('')}</div>`).join('');
+ else if(PN.tab==='pend'){const gs=[...new Set(k.pend.map(p=>p.g))];body=k.pend.length?gs.map(g=>`<div class="grp"><div class="grp-h"><h3>${esc(g)}</h3><span class="tag w">${k.pend.filter(p=>p.g===g).length}</span></div>${k.pend.filter(p=>p.g===g).map(p=>`<div class="ck" style="cursor:default"><span><span class="t">${esc(p.t)}</span><span class="w">${esc(STEPS.find(s=>s.k===p.s)?.t||'')}</span></span></div>`).join('')}</div>`).join(''):'<div class="empty">Nenhuma pendência. Tudo o que precisamos foi informado.</div>'}
+ else if(PN.tab==='acessos'){const pl=[...new Set(k.ac.map(i=>i.plat))];body=`<p class="help">Marque quando o acesso tiver sido concedido à Ritual por convite oficial.</p>`+pl.map(p=>{const it=k.ac.filter(i=>i.plat===p);return`<div class="grp"><div class="grp-h"><h3>${p}</h3><span class="tag">${it.filter(i=>ck[i.id]).length}/${it.length}</span></div>${ckList(it)}</div>`}).join('')}
+ else if(PN.tab==='materiais')body=`<div class="grp">${ckList(k.mt)}</div>`;
+ else if(PN.tab==='tecnico')body=`<p class="help">Gerado a partir das respostas: só aparecem as tarefas que fazem sentido para a estrutura e os canais deste cliente.</p>`+checklist(a).map(g=>`<div class="grp"><div class="grp-h"><h3>${esc(g.n)}</h3><span class="tag">${g.items.filter(i=>ck[i.id]).length}/${g.items.length}</span></div>${ckList(g.items)}</div>`).join('');
+ const bar=(l,n,t)=>`<div class="prog"><span>${l}</span><span>${n}/${t}</span></div><div class="bar"><i style="width:${t?n/t*100:0}%"></i></div>`;
+ $('#app').innerHTML=`<div class="pn"><div class="pn-top"><button class="btn ghost sm" id="back">← Todos os onboardings</button><div style="display:flex;gap:8px;flex-wrap:wrap">${c.answers?'<button class="btn sm" id="cpsum">Copiar resumo</button><button class="btn sm" id="xjson">Exportar JSON</button><button class="btn pri sm" id="xpdf">Exportar PDF</button>':''}</div></div>
+ <div class="det-hd"><div class="mk" style="padding-top:22px"><h1 style="font-size:clamp(28px,3.6vw,42px);margin-bottom:8px">${esc(c.name||'Sem nome')}</h1><div class="facts" style="margin:0"><span>${esc(c.id||c._id)}</span><span>${esc(SVC[c.services]||'')}</span><span>Enviado ${c.submittedAt?fmtDT(c.submittedAt):'—'}</span>${c.answers?`<span>Preenchido ${k.comp}%</span>`:''}</div></div></div>
+ <div class="det-grid"><div><div class="tabs" role="tablist">${tabs.map(([t,l])=>`<button role="tab" data-tab="${t}" aria-selected="${PN.tab===t}">${esc(l)}</button>`).join('')}</div>${body}</div>
+ <aside class="side"><div class="card"><label for="sts">Status do onboarding</label><select class="in" id="sts">${STATUS.map(([s,l])=>`<option value="${s}" ${c.status===s?'selected':''}>${l}</option>`).join('')}</select>${c.answers&&sug!==c.status?`<p class="help" style="margin:10px 0 0">Sugestão pelo checklist: <button class="btn sm ghost" id="sug" data-s="${sug}">${esc(STL[sug])}</button></p>`:''}</div>
+ ${c.answers?`<div class="card">${bar('Acessos',k.pAc,k.ac.length)}${bar('Materiais',k.pMt,k.mt.length)}${bar('Checklist técnico',k.pTk,k.tk.length)}</div>`:''}
+ <div class="card"><label for="notes">Observações internas</label><textarea class="in" id="notes" placeholder="Visíveis só para a equipe Ritual">${esc(c.notes||'')}</textarea><p class="help" id="nsv" style="margin:6px 0 0;font-size:13px"></p></div>
+ <div class="card"><label>Histórico</label><ul class="hist">${(c.history||[]).slice().reverse().map(h=>`<li>${esc(fmtDT(h.at))} · ${esc(STL[h.s]||h.s)}${h.by?' · '+esc(h.by):''}</li>`).join('')||'<li>—</li>'}</ul></div>
+ <button class="btn ghost sm" id="del" style="color:#ff6b72">Excluir onboarding</button></aside></div></div>`;
+ const app=$('#app');
+ app.onclick=async e=>{const b=e.target.closest('button');if(!b)return;
+  if(b.id==='back'){PN.open=null;renderPanel();return}
+  if(b.dataset.tab){PN.tab=b.dataset.tab;renderDetail();return}
+  if(b.id==='sug'){const s=b.dataset.s;await writeClient(c,{status:s},{s,at:Date.now(),by:'Sugestão do checklist'});return}
+  if(b.id==='cpsum')return copy(textSummary(a,{id:c.id||c._id,sentAt:c.submittedAt}).split('Para a equipe Ritual')[0].trim());
+  if(b.id==='xjson')return save(`onboarding-${slug(c.name)}.json`,JSON.stringify({...packet(a,{id:c.id,sentAt:c.submittedAt}),status:c.status,checks:c.checks||{},notes:c.notes||''},null,1));
+  if(b.id==='xpdf'){const bl=buildPDF(a,{id:c.id||c._id,sentAt:c.submittedAt},c);if(!bl)return toast('Gerador de PDF carregando, tente de novo');return save(`onboarding-${slug(c.name)}.pdf`,bl)}
+  if(b.id==='sendmsg')return copy(inviteMsg(c.name,PUBLIC_URL));
+  if(b.id==='imp')return modalImport();
+  if(b.id==='del'){openModal(`<h2>Excluir ${esc(c.name)}?</h2><p class="help">As respostas, checklists e observações deste cliente serão apagados de forma definitiva.</p><div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px"><button class="btn ghost" data-close>Cancelar</button><button class="btn pri" id="okd">Excluir</button></div>`);$('#okd').onclick=async()=>{try{await DB.doc('clients/'+c._id).delete();closeModal();PN.open=null;renderPanel();toast('Excluído')}catch(e){toast('Sem permissão')}};return}
+ };
+ app.onchange=async e=>{const el=e.target;
+  if(el.dataset.ck){const checks={...(c.checks||{}),[el.dataset.ck]:el.checked};el.closest('.ck').classList.toggle('on',el.checked);try{await writeClient(c,{checks})}catch(_){el.checked=!el.checked}}
+  if(el.id==='sts'){await writeClient(c,{status:el.value},{s:el.value,at:Date.now(),by:'Equipe'})}
+ };
+ const n=$('#notes');n.oninput=()=>{$('#nsv').textContent='Salvando…';clearTimeout(n.t);n.t=setTimeout(async()=>{try{await writeClient(c,{notes:n.value});const s=$('#nsv');if(s)s.textContent='Salvo'}catch(_){}},800)};
+}
+
+/* =========================================================
+   Roteamento e inicialização
+   ========================================================= */
+function route(){if(location.hash==='#painel'){subscribePanel();renderPanel()}else{PN.open=null;renderForm()}}
+window.addEventListener('hashchange',()=>{route();scrollTo(0,0)});
+route();
+(async()=>{
+ const [db,user]=await Promise.all([use('db'),use('user')]);
+ DB=db;USER=user;
+ if(user){const w=await user.can('data.write').catch(()=>null);const ed=await user.canEdit().catch(()=>false);CAN=!!db&&(w===true||ed===true)}
+ if(DB)DB.doc('config/main').get().then(s=>{if(s.exists){CONFIG={...CONFIG,...s.data()};if(location.hash!=='#painel')renderForm()}}).catch(()=>{});
+ route();
+})();
+}
+</script>
+</body>
+</html>
